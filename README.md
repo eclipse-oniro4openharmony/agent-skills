@@ -7,7 +7,10 @@ A collection of professional AI agent skills designed to enhance development wor
 ### 1. [HarmonyOS Dev](./skills/harmonyos-dev)
 Initialize HarmonyOS project templates (Standard ArkTS or Native C++) and perform initial build verification. Supports Standard ArkTS and Native C++ templates targeting API 20.
 
-### 2. [Conductor Dev](./skills/conductor-dev)
+### 2. [OHOS App Dev](./skills/ohos-app-dev)
+Inner-loop development for existing OpenHarmony / HarmonyOS apps — lint, build, deploy, run, logs, and UI validation via the `ohos-app` and `ohos-hdc` MCP servers.
+
+### 3. [Conductor Dev](./skills/conductor-dev)
 Initialize the Conductor directory for project orchestration. Use when starting a new project or adding Conductor-based workflow management to an existing repository.
 
 ---
