@@ -1,0 +1,20 @@
+{
+  "name": "ohos-hdc-mcp",
+  "version": "0.1.0",
+  "description": "MCP server wrapping OpenHarmony hdc for Claude Code",
+  "type": "module",
+  "bin": {
+    "ohos-hdc-mcp": "./index.js"
+  },
+  "main": "./index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

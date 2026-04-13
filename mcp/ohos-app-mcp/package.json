@@ -1,0 +1,20 @@
+{
+  "name": "ohos-app-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for OpenHarmony/HarmonyOS app development (ohpm, codelinter, hvigorw, deploy)",
+  "type": "module",
+  "bin": {
+    "ohos-app-mcp": "./index.js"
+  },
+  "main": "./index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
