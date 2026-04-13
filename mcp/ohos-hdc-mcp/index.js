@@ -206,7 +206,11 @@ server.registerTool(
   {
     title: "Send input",
     description:
-      "Inject UI input via uitest uiInput. type: click|doubleClick|longClick|swipe|drag|fling|keyEvent|inputText.",
+      "Inject UI input via uitest uiInput. type: click|doubleClick|longClick|swipe|drag|fling|keyEvent|inputText. " +
+      "click/doubleClick/longClick params: {x, y}. " +
+      "swipe/drag/fling params: {startX, startY, endX, endY, speed?} (aliases: x1/y1/x2/y2, velocity). " +
+      "keyEvent params: {keyID} (alias: key). " +
+      "inputText params: {text}.",
     inputSchema: {
       type: z.enum([
         "click",
@@ -233,12 +237,17 @@ server.registerTool(
       case "swipe":
       case "drag":
       case "fling": {
-        const vel = p.velocity ? ` ${+p.velocity}` : "";
-        cmd = `uitest uiInput ${type} ${+p.x1} ${+p.y1} ${+p.x2} ${+p.y2}${vel}`;
+        const x1 = p.x1 ?? p.startX;
+        const y1 = p.y1 ?? p.startY;
+        const x2 = p.x2 ?? p.endX;
+        const y2 = p.y2 ?? p.endY;
+        const speed = p.velocity ?? p.speed;
+        const vel = speed ? ` ${+speed}` : "";
+        cmd = `uitest uiInput ${type} ${+x1} ${+y1} ${+x2} ${+y2}${vel}`;
         break;
       }
       case "keyEvent":
-        cmd = `uitest uiInput keyEvent ${p.key}`;
+        cmd = `uitest uiInput keyEvent ${p.key ?? p.keyID}`;
         break;
       case "inputText": {
         const t = String(p.text ?? "").replace(/'/g, `'\\''`);
