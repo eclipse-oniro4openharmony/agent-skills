@@ -9,7 +9,7 @@ Stdio MCP server (Node.js) that wraps `hdc` as structured tools for Claude Code.
 - `install_hap(path)` / `uninstall_app(bundle_name)`
 - `start_app(bundle_name, ability_name)` / `stop_app(bundle_name)`
 - `screenshot()` — returns a JPEG image Claude can analyze
-- `get_logs(bundle_name?, lines?)` — `hilog -x` (optionally grep-filtered)
+- `get_logs(bundle_name?, grep?, lines?)` — `hilog -x` with optional bundle/regex filter
 - `send_file(local, remote)` / `recv_file(remote, local)`
 - `send_input(type, params)` — `click`, `doubleClick`, `longClick`, `swipe`, `drag`, `fling`, `keyEvent`, `inputText`
 - `get_device_info()` — model, OS version, display dump

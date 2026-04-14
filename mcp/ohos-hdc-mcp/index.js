@@ -156,13 +156,14 @@ server.registerTool(
   {
     title: "Get hilog",
     description:
-      "Dump hilog (`hilog -x`). Optional bundle_name filter and lines cap.",
+      "Dump hilog (`hilog -x`). Optional bundle_name filter, grep regex filter, and lines cap.",
     inputSchema: {
       bundle_name: z.string().optional(),
+      grep: z.string().optional(),
       lines: z.number().int().positive().optional(),
     },
   },
-  async ({ bundle_name, lines }) => {
+  async ({ bundle_name, grep, lines }) => {
     let pipe = "hilog -x";
     if (bundle_name) {
       const safe = bundle_name.replace(/'/g, `'\\''`);
@@ -173,6 +174,10 @@ server.registerTool(
       }
       const alt = pids.map((p) => `\\b${p}\\b`).join("|");
       pipe += ` | grep -E '${alt}'`;
+    }
+    if (grep) {
+      const safeGrep = grep.replace(/'/g, `'\\''`);
+      pipe += ` | grep -E '${safeGrep}'`;
     }
     if (lines && lines > 0) pipe += ` | tail -n ${Math.floor(lines)}`;
     return text(fmt(await sh(pipe, { timeoutMs: 30_000 })));
