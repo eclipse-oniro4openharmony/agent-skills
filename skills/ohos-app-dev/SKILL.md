@@ -22,7 +22,8 @@ Trigger on requests like: "build the app", "deploy to the device", "run it on de
 4. **Install dependencies only when needed.** `build_hap` auto-runs `ohpm install --all` if `oh_modules/` is missing. Don't call `ohpm_install` pre-emptively — call it when a dependency in `oh-package.json5` changed or the build complains about missing modules.
 5. **Device serial.** If `list_devices` returns more than one target, ask the user which to use (or expect `DEVICE_SERIAL` in env). Never silently pick one.
 6. **No destructive device ops without confirmation.** `uninstall_app`, wiping `/data/...`, overwriting device files via `send_file` to system paths — confirm first.
-7. **UI coordinates are native pixels** and are 1:1 with `screenshot()` output. When computing tap targets from a screenshot, use the raw pixel coordinates — don't rescale.
+7. **UI coordinates are float percentages (0.0–1.0)** of the display, matching the 10×10 grid drawn over `screenshot()` output. Read targets off the gridlines (or use `dump_layout` for exact `c=[x,y]` centers) — never reach for raw pixels.
+8. **Verify before tapping ambiguous targets.** When a tap location isn't obvious from the gridded screenshot, run `dump_layout` to get the precise `center_pct` of the element you want, then `send_input`.
 
 ## Inner-loop workflow
 
@@ -36,8 +37,9 @@ The canonical edit → verify → deploy → inspect cycle:
 6. **Launch** — `mcp__ohos-hdc__start_app` with `bundle_name` and `ability_name` from the project's `app.json5` / `module.json5`.
 7. **Observe**:
    - `mcp__ohos-hdc__get_logs` — filter by `bundle_name` to cut noise; bump `lines` when chasing a crash.
-   - `mcp__ohos-hdc__screenshot` — returns a JPEG you can read directly. Use this to verify UI state, not to "prove completion".
-   - `mcp__ohos-hdc__send_input` — drive the app for smoke tests (`click`, `swipe`, `inputText`, `keyEvent`).
+   - `mcp__ohos-hdc__screenshot` — returns a downscaled JPEG with a 10×10 grid (axes 0.0–1.0). Use it to verify UI state, not to "prove completion".
+   - `mcp__ohos-hdc__dump_layout` — pruned UI tree with `b=[x1,y1,x2,y2]` and `c=[x,y]` centers as percentages; lookup before tapping when the gridded screenshot is ambiguous.
+   - `mcp__ohos-hdc__send_input` — drive the app for smoke tests (`click`, `swipe`, `inputText`, `keyEvent`). Coordinates are floats 0.0–1.0.
 8. **Stop / clean up** when done — `mcp__ohos-hdc__stop_app`, or `mcp__ohos-app__clean` if build artifacts are suspect.
 
 ## Recipes
