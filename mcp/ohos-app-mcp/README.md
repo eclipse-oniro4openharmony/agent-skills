@@ -26,7 +26,7 @@ Requires Node.js ≥18 and `ohpm`, `hvigorw` (project-local wrapper), `codelinte
 
 ```bash
 claude mcp add --transport stdio ohos-app -- \
-  node /home/mrfrank/agent-skills/ohos-app-mcp/index.js
+  node /path/to/agent-skills/mcp/ohos-app-mcp/index.js
 ```
 
 Or in `~/.claude.json`:
@@ -37,11 +37,11 @@ Or in `~/.claude.json`:
     "ohos-app": {
       "type": "stdio",
       "command": "node",
-      "args": ["/home/mrfrank/agent-skills/ohos-app-mcp/index.js"],
+      "args": ["/path/to/agent-skills/mcp/ohos-app-mcp/index.js"],
       "env": {
         "OHOS_PROJECT_PATH": "/path/to/your/app",
         "OHPM_PATH": "ohpm",
-        "HVIGORW_NAME": "hvigorw",
+        "HVIGORW_PATH": "hvigorw",
         "CODELINTER_PATH": "codelinter",
         "HDC_PATH": "hdc",
         "DEVICE_SERIAL": "auto"
@@ -49,6 +49,28 @@ Or in `~/.claude.json`:
     }
   }
 }
+```
+
+## Register with Codex
+
+Configure `~/.codex/config.toml` (Linux/macOS) or `C:\Users\<username>\.codex\config.toml` (Windows). Example with Windows install paths (tested on Windows):
+
+```toml
+[mcp_servers.ohos-app]
+command = "node"
+args = ["C:\\Users\\username\\repos\\agent-skills\\mcp\\ohos-app-mcp\\index.js"]
+cwd = "C:\\Users\\username\\repos\\agent-skills\\mcp\\ohos-app-mcp"
+enabled = true
+startup_timeout_sec = 30
+tool_timeout_sec = 600
+
+[mcp_servers.ohos-app.env]
+OHOS_PROJECT_PATH = "C:\\Users\\username\\repos\\my-app"
+OHPM_PATH = "ohpm"
+HVIGORW_PATH = "hvigorw"
+CODELINTER_PATH = "codelinter"
+HDC_PATH = "C:\\hdc_bin\\hdc.exe"
+DEVICE_SERIAL = "auto"
 ```
 
 ## Notes
