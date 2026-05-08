@@ -18,7 +18,7 @@ Stdio MCP server (Node.js) that wraps `hdc` as structured tools for Claude Code.
 ## Install
 
 ```bash
-cd device/board/oniro/tools/ohos-hdc-mcp
+cd mcp/ohos-hdc-mcp
 npm install
 ```
 
@@ -28,7 +28,7 @@ Requires Node.js ≥18.
 
 ```bash
 claude mcp add --transport stdio ohos-hdc -- \
-  node /home/mrfrank/openharmony-6.1/device/board/oniro/tools/ohos-hdc-mcp/index.js
+  node /path/to/agent-skills/mcp/ohos-hdc-mcp/index.js
 ```
 
 Or in `~/.claude.json`:
@@ -39,7 +39,7 @@ Or in `~/.claude.json`:
     "ohos-hdc": {
       "type": "stdio",
       "command": "node",
-      "args": ["/home/mrfrank/openharmony-6.1/device/board/oniro/tools/ohos-hdc-mcp/index.js"],
+      "args": ["/path/to/agent-skills/mcp/ohos-hdc-mcp/index.js"],
       "env": {
         "HDC_PATH": "hdc",
         "DEVICE_SERIAL": "auto"
@@ -47,6 +47,27 @@ Or in `~/.claude.json`:
     }
   }
 }
+```
+
+## Register with Codex
+
+Configure `~/.codex/config.toml` (Linux/macOS) or `C:\Users\<username>\.codex\config.toml` (Windows). Example with Windows install paths (tested on Windows):
+
+```toml
+[mcp_servers.ohos-hdc]
+command = "node"
+args = ["C:\\Users\\username\\repos\\agent-skills\\mcp\\ohos-hdc-mcp\\index.js"]
+cwd = "C:\\Users\\username\\repos\\agent-skills\\mcp\\ohos-hdc-mcp"
+enabled = true
+startup_timeout_sec = 30
+tool_timeout_sec = 600
+
+[mcp_servers.ohos-hdc.env]
+HDC_PATH = "C:\\hdc_bin\\hdc.exe"
+DEVICE_SERIAL = "auto"
+
+[mcp_servers.ohos-hdc.tools.list_devices]
+approval_mode = "approve"
 ```
 
 ## Notes
