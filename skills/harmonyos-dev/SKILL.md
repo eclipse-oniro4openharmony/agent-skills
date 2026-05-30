@@ -1,67 +1,67 @@
 ---
 name: harmonyos-dev
-description: Initialize HarmonyOS project templates (Standard ArkTS or Native C++) and perform initial build verification.
+description: Scaffold a new OpenHarmony / HarmonyOS app (Standard ArkTS or Native C++) and verify it builds. Cross-platform (Linux / macOS / Windows). For the inner dev loop on an existing project use `ohos-app-dev`; for system/persistent bundles use `ohos-system-dev`.
 ---
 
-# HarmonyOS Development Skill (Template Initialization)
+# HarmonyOS Development Skill (Project Scaffolding)
+
+Scaffold a new app and confirm it builds. **Cross-platform** — no PowerShell-only commands.
+Prefer the **`oniro-app` CLI** for scaffolding and build verification: it is cross-platform,
+non-interactive (explicit flags, stdout/stderr split, exit codes), and owns the canonical
+templates.
+
+> **Prereqs:** `oniro-app` on PATH (`npm i -g @oniroproject/oniro-app`), plus an SDK +
+> command-line tools (`oniro-app sdk install <ver>`, `oniro-app cmdtools install`).
 
 ## Directives
-- **Single Purpose:** This skill is strictly for project scaffolding and initial build verification.
-- **Templates:** Supports two templates: Standard (ArkTS only) and Native C++ (ArkTS + Native API).
-- **Post-Initialization:** After successful build and git initialization, suggest using Conductor for project orchestration.
-- **PowerShell Compatibility:** All commands MUST be PowerShell-compatible.
-  - Use `;` as a statement separator.
-  - Use `New-Item -ItemType Directory -Path <path> -Force` instead of `mkdir -p`.
-  - Use `(Get-ChildItem -Name)` instead of `ls /b` or `dir /b`.
-  - Use `Test-Path <path>` to check for existence before operating on files.
 
-## Initialization Workflow
-1. **Environment Check:** Verify `ohpm`, `hvigorw`, and `codelinter` are installed by running `ohpm -v; hvigorw -v; codelinter -h`.
-2. **Template Selection:** Default to **Standard** ArkTS project unless the user explicitly mentions "Native C++" or "Native API". Do not ask for confirmation if the request is generic.
-3. **Directory Check:** Ensure the target directory is suitable for a new project.
-4. **Execution:**
-   - **Project Files:** Use `xcopy /E /I /Y "assets/harmonyos-project-template/*" "."` (or the native template path) to copy project files.
-   - **Scripts:** Use `xcopy /E /I /Y "scripts/*" "scripts/"` to copy verification scripts.
-   - **Dependency Installation:** Run `ohpm install`.
-   - **Environment Check:** Run `node scripts/check_env.cjs`.
-   - **Git Initialization:** If the build succeeds, run `git init ; git add . ; git commit -m "Initial commit from HarmonyOS template"`.
-   - **User Hint:** Advise the user that they can now use the `conductor-dev` skill to initialize a `conductor/` directory for project orchestration and further implementation.
-   - **Shell Usage:** Always use `;` as the command separator. Prefer `xcopy` or `robocopy` for directory copies on Windows to ensure recursive copying and directory creation. Avoid `mkdir -p` and `&&`.
+- **Single purpose:** scaffolding + initial build verification. Ongoing inner-loop work →
+  `ohos-app-dev`; system/persistent bundles → `ohos-system-dev`.
+- **Cross-platform shell — do NOT assume PowerShell.** Use the agent's file tools or
+  OS-appropriate commands: `mkdir -p` / `cp -r` / `[ -e <path> ]` on macOS/Linux;
+  `New-Item -ItemType Directory -Force` / `Copy-Item -Recurse` / `Test-Path` on Windows.
+  Better: let `oniro-app` (cross-platform) do the scaffolding and build so you avoid
+  hand-rolled copies entirely.
+- **Lint before commit.** After editing `.ets` / `.ts`, run `oniro-app lint --files <globs>`.
 
-## Implementation Workflow
-1. **Lint Before Commit:** Execute `codelinter` on all modified `.ets` or `.ts` files immediately after editing.
-   - **Command:** `codelinter <file_path>`
-   - **Requirement:** All linting errors must be resolved or explicitly justified before proceeding. Do NOT run unit tests (`hvigorw test`) or full project builds (`assembleHap`) during task implementation.
-2. **UI Component Optimization:** When implementing UI components, prioritize performance by minimizing nested containers and using efficient layout managers.
-3. **Self-Learning & Optimization:** After completing a task, analyze the implementation for potential optimizations or reusable patterns. Document these "lessons learned" in the task summary or the project's internal knowledge base to improve future development speed and quality.
+## Scaffold
 
-## Core Capabilities
+### Standard ArkTS (preferred) — via the CLI
+Non-interactive and cross-platform:
+```
+oniro-app create --name <AppName> --bundle <com.example.app> --location <parent-dir> --sdk <api>
+```
+`oniro-app templates list` shows the available templates; `--sdk` is the API level
+(e.g. `23` for 6.1 — see the table below). This replaces the old `xcopy`/`New-Item`
+template-copy flow.
 
-### 1. Initialize Project
-Spatially sets up the project structure and installs dependencies.
-- **Trigger:** "Initialize new project", "Create new HarmonyOS app", "Scaffold template"
-- **Action:**
-  1. Default to Standard ArkTS template unless Native C++ is requested.
-  2. Copies the selected template (`assets/harmonyos-project-template/` or `assets/nativec-template/`) to the root.
-  3. Copies `scripts/*` into the `scripts/` directory.
-  4. Installs dependencies, runs the environment check, and performs an initial build.
-  5. Runs `git init` upon successful build completion.
-  6. **Hint:** Provide a clear hint that the user are adviced to use `conductor` for advanced project orchestration.
-  7. **Shell Usage:** Always use `;` as the command separator and ensure PowerShell compatibility. Use `New-Item -ItemType Directory -Force` for directory creation.
+### Native C++ (ArkTS + Native API)
+If the CLI templates don't include a Native C++ variant, use the template bundled with this
+skill: copy `assets/nativec-template/` into the target directory with a **cross-platform**
+recursive copy (agent file tools, or `cp -r` on macOS/Linux / `Copy-Item -Recurse` on
+Windows), then run `ohpm install`. (`assets/harmonyos-project-template/` is the Standard
+ArkTS equivalent if you'd rather copy than use `oniro-app create`.)
 
-### 2. Build & Verify
-Ensures the application compiles correctly and uses correct SDK versions.
-- **Trigger:** "Build the app", "Check for errors", "Verify template"
-- **Action:**
-  1. **SDK Verification:** You MUST read `build-profile.json5` to identify the `targetSdkVersion` and `compatibleSdkVersion`. Use the "Version to API Level Mapping" table below to cross-reference and verify the versioning.
-  2. **Build:** Run `ohpm install; node scripts/check_env.cjs`.
+## Verify the build
+```
+oniro-app build          # auto-runs `ohpm install --all` if oh_modules/ is missing, then assembleHap
+```
+Resolve any errors before proceeding. Read `build-profile.json5` and cross-check
+`compatibleSdkVersion` / `targetSdkVersion` against the API-level table. (The optional
+`scripts/check_env.cjs` sanity-checks that `ohpm` / `hvigorw` / `codelinter` are on PATH.)
+
+## After scaffolding
+- On a successful build: `git init && git add -A && git commit -m "Initial commit from HarmonyOS template"`.
+- Hand off to **`ohos-app-dev`** for the build → deploy → run → logs → UI loop, or
+  **`conductor-dev`** to add Conductor-based orchestration.
 
 ## Resources
-- **Standard Template:** `assets/harmonyos-project-template/`
-- **NativeC Template:** `assets/nativec-template/`
-- **Environment Scripts:** `scripts/`
+- Standard ArkTS template: `assets/harmonyos-project-template/`
+- Native C++ template: `assets/nativec-template/`
+- Env check: `scripts/check_env.cjs`
 
-## Reference: Version to API Level Mapping
+## Reference: Version → API Level
+
 | Version | API Level |
 | :--- | :--- |
 | 4.0 | 10 |
@@ -73,6 +73,7 @@ Ensures the application compiles correctly and uses correct SDK versions.
 | 5.1.0 | 18 |
 | 5.1.1 | 19 |
 | 6.0 | 20 |
+| 6.1 | 23 |
 
-**Note:** If the version string in `build-profile.json5` includes a number in parentheses, such as `6.0.0(20)`, the number in the parentheses is the API Level.
-
+**Note:** If the version string in `build-profile.json5` includes a number in parentheses
+(e.g. `6.0.0(20)`), the parenthesised number **is** the API level.

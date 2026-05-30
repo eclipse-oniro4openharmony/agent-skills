@@ -1,76 +1,113 @@
 ---
 name: ohos-app-dev
-description: Develop, build, deploy, and validate OpenHarmony / HarmonyOS applications on a connected device. Use for the inner dev loop (lint → build → deploy → run → inspect logs → UI validation) on an existing project. For project scaffolding use `harmonyos-dev` instead.
+description: Develop, build, deploy, and validate OpenHarmony / HarmonyOS applications on a connected device. Use for the inner dev loop (lint → build → deploy → run → inspect logs → UI validation) on an existing project. For project scaffolding use `harmonyos-dev`; for system/persistent bundles use `ohos-system-dev`.
 ---
 
 # OpenHarmony App Dev
 
-Inner-loop skill for working on an **existing** OpenHarmony / HarmonyOS app. All toolchain and device actions are performed through two MCP servers — never shell out to `ohpm`, `hvigorw`, `codelinter`, or `hdc` directly when an MCP tool exists for the operation.
+Inner-loop skill for working on an **existing** OpenHarmony / HarmonyOS app. Every
+toolchain and device action goes through the **`oniro-app` CLI** — a cross-platform,
+agent-designed wrapper over `hvigorw` / `ohpm` / `codelinter` / `hdc` / `uitest`:
+explicit flags, results on **stdout**, progress/logs on **stderr**, non-zero exit on
+failure. Drop to raw `hdc` / `aa` / `bm` only for device operations `oniro-app` does
+not cover.
 
-- **`ohos-app`** — toolchain: `ohpm`, `codelinter`, `hvigorw`, HAP packaging, deploy.
-- **`ohos-hdc`** — device runtime: shell, input, logs, screenshots, app lifecycle, file transfer.
+> **Prereqs:** `oniro-app` on PATH (`npm i -g @oniroproject/oniro-app`) plus an installed
+> SDK and command-line tools (`oniro-app sdk install <ver>`, `oniro-app cmdtools install`).
+> Most commands default to the current directory or accept a trailing `[project-dir]`.
 
-## When to use this skill
+## When to use
 
-Trigger on requests like: "build the app", "deploy to the device", "run it on device", "lint these files", "grab the logs", "take a screenshot", "tap this button", "why is it crashing on launch", "install the latest HAP". If the user wants to *create* a new project, hand off to `harmonyos-dev`.
+Trigger on: "build the app", "deploy / run it on device", "lint these files", "grab the
+logs", "take a screenshot", "tap this button", "why is it crashing on launch". For
+*creating* a project → `harmonyos-dev`. For **system / persistent bundles** (systemui,
+launcher, OS-source-tree builds, reboot-to-reload) → `ohos-system-dev`.
 
 ## Directives
 
-1. **MCP-first.** Prefer `mcp__ohos-app__*` / `mcp__ohos-hdc__*` tools over Bash. They handle signing, `hvigorw`, device-serial selection, and output parsing. Drop to `shell(...)` on the hdc MCP only for device-side commands that have no dedicated tool.
-2. **Project path resolution.** The MCP servers respect `OHOS_PROJECT_PATH` from their env. Only pass `project_path` explicitly when operating on a project other than the configured default, or when the working directory is ambiguous.
-3. **Lint before you iterate.** After editing any `.ets` / `.ts` / `.cpp` / `.h` file, run `codelinter` on the changed files before building. Resolve errors; justify warnings.
-4. **Install dependencies only when needed.** `build_hap` auto-runs `ohpm install --all` if `oh_modules/` is missing. Don't call `ohpm_install` pre-emptively — call it when a dependency in `oh-package.json5` changed or the build complains about missing modules.
-5. **Device serial.** If `list_devices` returns more than one target, ask the user which to use (or expect `DEVICE_SERIAL` in env). Never silently pick one.
-6. **No destructive device ops without confirmation.** `uninstall_app`, wiping `/data/...`, overwriting device files via `send_file` to system paths — confirm first.
-7. **UI coordinates are float percentages (0.0–1.0)** of the display, matching the 10×10 grid drawn over `screenshot()` output. Read targets off the gridlines (or use `dump_layout` for exact `c=[x,y]` centers) — never reach for raw pixels.
-8. **Verify before tapping ambiguous targets.** When a tap location isn't obvious from the gridded screenshot, run `dump_layout` to get the precise `center_pct` of the element you want, then `send_input`.
+1. **CLI-first.** Use `oniro-app <cmd>` for build / deploy / device / logs / input /
+   capture. It auto-resolves the device serial, the bundle + main ability (from
+   `app.json5` / `module.json5`), and built HAP paths. Use raw `hdc`/`aa`/`bm` only when
+   no `oniro-app` command fits — and prefer adding the recipe here over guessing.
+2. **Lint before you iterate.** After editing `.ets` / `.ts` / `.cpp` / `.h`, run
+   `oniro-app lint --files <changed globs>` (or `oniro-app lint` for the whole project).
+   Resolve errors; justify warnings.
+3. **Device serial.** `oniro-app devices`. If more than one target, set
+   `ONIRO_DEVICE_SERIAL` (or pass `--device <serial>`). Never silently pick one.
+4. **No destructive device ops without confirmation** — `app uninstall`, wiping `/data/...`,
+   overwriting system files via `file send`.
+5. **UI coordinates.** `oniro-app screenshot --grid` overlays a 10×10 grid with axes
+   labelled 0.0–1.0 — read tap targets off the gridlines. `oniro-app input` takes
+   **pixels**; multiply the grid fraction by the device resolution (printed on the
+   screenshot's stderr, e.g. `360x720`), or read an element's exact center from
+   `oniro-app dump layout` (`c=[x,y]` as 0–1 → × resolution).
 
 ## Inner-loop workflow
 
-The canonical edit → verify → deploy → inspect cycle:
-
-1. **Edit** source files (via `Edit` / `Write`).
-2. **Lint** — `mcp__ohos-app__codelinter` on the changed files (pass them via `args`).
-3. **Build** — `mcp__ohos-app__build_hap` (default mode; use `tasks` only for non-standard targets like `assembleHsp`).
-4. **Confirm device** — `mcp__ohos-hdc__list_devices`. If empty, stop and tell the user.
-5. **Deploy** — `mcp__ohos-app__deploy` with `replace: true` for iterative installs. It picks the most recent signed HAP automatically.
-6. **Launch** — `mcp__ohos-hdc__start_app` with `bundle_name` and `ability_name` from the project's `app.json5` / `module.json5`.
-7. **Observe**:
-   - `mcp__ohos-hdc__get_logs` — filter by `bundle_name` to cut noise; bump `lines` when chasing a crash.
-   - `mcp__ohos-hdc__screenshot` — returns a downscaled JPEG with a 10×10 grid (axes 0.0–1.0). Use it to verify UI state, not to "prove completion".
-   - `mcp__ohos-hdc__dump_layout` — pruned UI tree with `b=[x1,y1,x2,y2]` and `c=[x,y]` centers as percentages; lookup before tapping when the gridded screenshot is ambiguous.
-   - `mcp__ohos-hdc__send_input` — drive the app for smoke tests (`click`, `swipe`, `inputText`, `keyEvent`). Coordinates are floats 0.0–1.0.
-8. **Stop / clean up** when done — `mcp__ohos-hdc__stop_app`, or `mcp__ohos-app__clean` if build artifacts are suspect.
+1. **Edit** sources.
+2. **Lint** — `oniro-app lint --files <changed files>`.
+3. **Build** — `oniro-app build` — auto-runs `ohpm install --all` when `oh_modules/` is
+   missing, builds, then discovers HAPs. Flags: `--module <m>` / `--product <p>` /
+   `--mode release` for non-default targets, `--json` to print the discovered HAP paths,
+   `--no-deps` to skip the ohpm step.
+4. **Device** — `oniro-app devices`; stop and tell the user if empty.
+5. **Deploy** — `oniro-app app apply` — verified install: handles sign-info-inconsistent
+   (uninstall+install for a normal app), asset-cache invalidation (reboot), and
+   persistent-bundle restart, and prints `method` / pre+post pid. Use `oniro-app app
+   install` for a plain `hdc install`.
+6. **Launch** — `oniro-app app launch` (reads bundle + ability automatically; `--ability
+   <name>` / `--module <m>` to target a specific one).
+7. **Observe**
+   - **Logs (bounded):** `oniro-app watch --log '<regex>' --for 5000` collects matches for
+     a window; `oniro-app wait --log '<regex>' --timeout 30000 [--bundle <b>]` returns the
+     instant a line matches (perfect for "did action X fire?"). Fallback:
+     `hdc shell hilog -x | grep -E ...`.
+   - **Screenshot:** `oniro-app screenshot --grid -o /tmp/s.jpg` then read `/tmp/s.jpg`.
+     Use `--grid` to pick tap targets; omit it for full-res content. `--max-dim <px>`
+     caps the longest side (default 1024).
+   - **Transient UI / animations / boot:** `oniro-app screenshot --contact-sheet -o
+     /tmp/cs.jpg` — captures a burst (default 8 frames, `--burst N` / `--interval ms`)
+     into **one** tiled, index-labelled sheet and prints per-frame change diffs (0..1) on
+     stdout. The highest-diff frame is where it changed — one image instead of N.
+   - **Layout:** `oniro-app dump layout` — pruned tree, bounds/centers normalised 0–1;
+     look up a target's center before tapping when the screenshot is ambiguous.
+   - **Drive:** `oniro-app input --type click --x <px> --y <px>` (also `doubleClick`,
+     `longClick`, `swipe`/`drag`/`fling` with `--x2 --y2 --speed`, `keyEvent --key
+     Back|Home|Power`, `inputText --text '...'`). Held / multi-segment paths:
+     `oniro-app gesture --waypoints '[{"x":..,"y":..,"t":..}]' [--hold-start ms --hold-end ms]`.
+8. **Stop / clean up** — `oniro-app app stop <bundle>`.
 
 ## Recipes
 
 ### Quick rebuild & reinstall
-Use after code edits when dependencies are unchanged:
-- `codelinter(args: ["<changed-files>"])`
-- `build_hap()`
-- `deploy(replace: true)`
-- `stop_app(bundle_name)` → `start_app(bundle_name, ability_name)`
+`oniro-app lint --files <files>` → `oniro-app build` → `oniro-app app apply` →
+`oniro-app app stop <bundle>` → `oniro-app app launch`.
 
-### Diagnosing a runtime crash
-- `start_app(...)` to reproduce.
-- `get_logs(bundle_name, lines: 500)` — look for `E` level and `SIGSEGV` / `FATAL`.
-- If native: `get_device_info()` for OS version, then inspect the crash fault log via `shell("ls /data/log/faultlog/faultlogger")` and `recv_file` the relevant entry.
+### Diagnose a runtime crash
+`oniro-app app launch` to reproduce → `oniro-app watch --log 'FATAL|SIGSEGV| E ' --for 8000`
+(or `hdc shell hilog -x | grep -E 'FATAL|SIGSEGV'`). For native faults, list
+`/data/log/faultlog/faultlogger` via `hdc shell ls …` and pull the entry with
+`oniro-app file recv <remote> <local>`.
 
 ### UI validation against a design
-- `screenshot()` → compare to reference. Read `build-profile.json5` first to know the target API level (see mapping below), since some components render differently across API levels.
-- Record discrepancies as plain notes in the user's reply — don't spawn a journal file unless asked.
+`oniro-app screenshot --grid -o /tmp/s.jpg` → read & compare. Read `build-profile.json5`
+for the target API level (table below) — some components render differently across levels.
 
 ### Dependency change
-- Edit `oh-package.json5`.
-- `ohpm_install()`.
-- `build_hap()`.
+Edit `oh-package.json5` → `oniro-app build` (re-runs `ohpm install` when needed).
 
-### Clean rebuild
-- `clean()` → `ohpm_install()` → `build_hap()`. Reach for this when builds fail with stale-cache symptoms (missing generated types, unresolved imports that clearly exist).
+### Common raw-device ops (no dedicated command)
+- List targets: `hdc list targets -v`
+- Force-stop: `hdc shell aa force-stop <bundle>`  (or `oniro-app app stop <bundle>`)
+- Push / pull: `oniro-app file send <local> <remote>` / `oniro-app file recv <remote> <local>`
+- Set a system prop: `hdc shell param set <key> <value>`
+- Reboot: `oniro-app reboot` (see `ohos-system-dev` for reboot-to-reload).
 
 ## SDK / API level reference
 
-Read `build-profile.json5` to get `compatibleSdkVersion` / `targetSdkVersion`. If the version string embeds the API level in parentheses (e.g. `6.0.0(20)`), the parenthesised number **is** the API level. Otherwise use:
+Read `build-profile.json5` for `compatibleSdkVersion` / `targetSdkVersion`. If the version
+embeds the API level in parentheses (e.g. `6.0.0(20)`), that number **is** the API level.
+Otherwise:
 
 | Version | API Level |
 | :--- | :--- |
@@ -87,4 +124,6 @@ Read `build-profile.json5` to get `compatibleSdkVersion` / `targetSdkVersion`. I
 
 ## Out of scope
 
-- Project scaffolding / template copy / `git init` of a fresh repo → use `harmonyos-dev`.
+- Scaffolding / templating a fresh project → `harmonyos-dev`.
+- System / persistent bundles, OHOS source-tree builds, sign-cert traps, reboot-to-reload
+  → `ohos-system-dev`.
