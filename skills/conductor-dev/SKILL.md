@@ -18,7 +18,7 @@ Scaffolds the `conductor/` directory in the current project.
   1. Create a `conductor/` directory at the project root if it doesn't exist.
   2. Create an `artifacts/snapshots/` directory at the project root if it doesn't exist.
   3. Create an `artifacts/logs/` directory at the project root if it doesn't exist.
-  4. Copy all template files from `assets/conductor-template/` to the `conductor/` directory using PowerShell-compatible commands.
+  4. Copy all template files from `assets/conductor-template/` to the `conductor/` directory using a cross-platform recursive copy (the agent's file tools, or `cp -r` on macOS/Linux / `Copy-Item -Recurse` on Windows).
   5. Inform the user that the Conductor directory and artifacts folder have been initialized.
 
 ### 2. Cycle Workflow (V4 Supercharged)
@@ -37,12 +37,11 @@ When implementing tracks or tasks under Conductor:
 4. **Task Verification:** 
     - For logic changes, rely primarily on `codelinter` to save tokens.
     - **UI Validation (MANDATORY):** For any UI modification, you MUST:
-        1. Ensure a device/emulator is connected via `hdc list targets`.
+        1. Ensure a device/emulator is connected via `oniro-app devices`.
         2. Ensure the `artifacts/snapshots/` directory exists.
-        3. Execute `hdc shell snapshot_display /data/local/tmp/snapshot.png` to capture the screen.
-        4. Pull the screenshot using `hdc file recv /data/local/tmp/snapshot.png "artifacts/snapshots/[task_id].png"`.
-        5. **Visual Comparison:** Compare the captured snapshot against the Figma design. Note any discrepancies in the `learning.md` or log.
-        6. (Optional but recommended) If the track specifies automated tests, run them (e.g., `hvigorw test`) and capture the final state or results as an additional snapshot.
+        3. Capture the screen straight to the artifact (one cross-platform command): `oniro-app screenshot -o "artifacts/snapshots/[task_id].jpeg"` — add `--grid` to read coordinates off a 10×10 (0.0–1.0) overlay, or `--contact-sheet` for a transient/animated state.
+        4. **Visual Comparison:** Compare the captured snapshot against the Figma design. Note any discrepancies in `learning.md` or the log.
+        5. (Optional but recommended) If the track specifies automated tests, run them (e.g., `oniro-app build` / `hvigorw test`) and capture the final state as an additional snapshot.
 4. **Visual Proof:** Save all UI validation snapshots to `artifacts/snapshots/[task_id].png` or `artifacts/snapshots/[task_id]_test.png`.
 5. **Idempotent Edits:** Before using the `replace` tool, you MUST use `read_file` to verify the current content. Ensure that `new_string` is DIFFERENT from the existing text to avoid "No changes to apply" errors.
 6. **Automated Self-Learning Loop:** 
@@ -56,12 +55,16 @@ When implementing tracks or tasks under Conductor:
 
 ## Cross-Platform Compatibility
 
-**CRITICAL:** When performing analysis or file operations, you MUST distinguish between available agent tools (e.g., `read_file`, `grep_search`) and shell commands. NEVER attempt to execute an agent tool name as a shell command within `run_shell_command`.
+When performing analysis or file operations, distinguish between agent tools (e.g.,
+`read_file`, `grep_search`) and shell commands — never run an agent-tool name as a shell
+command.
 
-When performing project analysis or file operations, you MUST use commands compatible with the user's operating system.
-- **Windows (PowerShell):** Use commands like `Get-ChildItem`, `New-Item -ItemType Directory -Force` (for `mkdir -p`), and avoid Unix-specific pipes like `xargs`.
-- **Unix (Bash):** Standard Unix commands are acceptable.
-- **Path Resolution:** Always use cross-platform path handling. In PowerShell, prefer `$HOME` over `~` for literal path strings.
+Prefer the cross-platform **`oniro-app`** CLI for any build / device / screenshot / lint
+step — it behaves identically on Linux, macOS, and Windows, so you avoid OS-specific shell
+branches. For raw file operations, use commands appropriate to the host OS:
+- **macOS / Linux (Bash):** `mkdir -p`, `cp -r`, `[ -e <path> ]`.
+- **Windows (PowerShell):** `New-Item -ItemType Directory -Force`, `Copy-Item -Recurse`, `Test-Path`; avoid Unix-only pipes like `xargs`.
+- **Path Resolution:** use cross-platform path handling; in PowerShell prefer `$HOME` over `~` for literal paths.
 
 ## Resources
 
