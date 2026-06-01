@@ -4,8 +4,8 @@ A collection of professional AI agent skills designed to enhance development wor
 
 ## 🚀 Available Skills
 
-### 1. [HarmonyOS Dev](./skills/harmonyos-dev)
-Scaffold a new OpenHarmony / HarmonyOS app (Standard ArkTS or Native C++) and verify it builds. Cross-platform, via the `oniro-app` CLI.
+### 1. [OHOS App Scaffold](./skills/ohos-app-scaffold)
+Scaffold a new OpenHarmony / HarmonyOS app (Standard ArkTS or Native C++) and verify it builds — cross-platform, via the `oniro-app` CLI (`oniro-app create [--template NativeCpp]`).
 
 ### 2. [OHOS App Dev](./skills/ohos-app-dev)
 Inner-loop development for existing OpenHarmony / HarmonyOS apps — lint, build, deploy, run, logs, and UI validation through the cross-platform `oniro-app` CLI.
@@ -29,7 +29,7 @@ npx skills add imansmallapple/agent-skills
 
 ### Install a specific skill
 ```bash
-npx skills add imansmallapple/agent-skills@harmonyos-dev
+npx skills add imansmallapple/agent-skills@ohos-app-scaffold
 npx skills add imansmallapple/agent-skills@conductor-dev
 ```
 
