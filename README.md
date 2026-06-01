@@ -24,13 +24,13 @@ You can install the entire collection or individual skills using the `npx skills
 
 ### Install the entire collection
 ```bash
-npx skills add imansmallapple/agent-skills
+npx skills add eclipse-oniro4openharmony/agent-skills
 ```
 
 ### Install a specific skill
 ```bash
-npx skills add imansmallapple/agent-skills@ohos-app-scaffold
-npx skills add imansmallapple/agent-skills@conductor-dev
+npx skills add eclipse-oniro4openharmony/agent-skills@ohos-app-scaffold
+npx skills add eclipse-oniro4openharmony/agent-skills@conductor-dev
 ```
 
 ## 🛠 Usage
