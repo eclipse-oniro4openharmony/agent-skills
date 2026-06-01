@@ -8,7 +8,7 @@
 - **Single Responsibility:** Each module, class, and function should have one clear responsibility to ensure maintainability.
 
 ## Development Workflow
-- **Build Verification:** The command `hvigorw assembleHap` must be executed after any structural change or new feature implementation to ensure build integrity.
+- **Build Verification:** Run `oniro-app build` after any structural change or new feature implementation to ensure build integrity.
 - **Test-Driven Development (TDD):** Encourage writing unit tests for business logic in the Domain layer and UI tests for critical user flows.
 - **Continuous Integration:** Ensure the project remains in a "buildable" state at all times.
 

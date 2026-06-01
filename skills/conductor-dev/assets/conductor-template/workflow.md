@@ -5,12 +5,12 @@
 2. **Specification & Planning:** Each track must have a `spec.md` and a `plan.md` before implementation begins.
 3. **Implementation:**
     - Work is performed in phases as defined in the `plan.md`.
-    - **Lint Before Commit:** Execute `codelinter` on all modified files immediately after editing and before running tests.
+    - **Lint Before Commit:** Run `oniro-app lint` on all modified files immediately after editing and before running tests.
     - Each task must be verified with tests where applicable.
     - **Visual Snapshots:** For every UI-related task, capture a screenshot or visual proof. Save to `conductor/artifacts/snapshots/[task_id].png`.
 4. **Verification:**
-    - **Task-level Verification:** Ensure `codelinter` passes and unit tests are successful for the specific changes in each task.
-    - **Final Build Check:** After ALL phases in the track plan are finished, run `hvigorw assembleHap` to ensure the entire project is stable and buildable.
+    - **Task-level Verification:** Ensure `oniro-app lint` passes and unit tests are successful for the specific changes in each task.
+    - **Final Build Check:** After ALL phases in the track plan are finished, run `oniro-app build` to ensure the entire project is stable and buildable.
     - **Test Coverage:** Maintain at least **80%** test coverage.
     - **Visual Regression:** Compare new snapshots against baseline if applicable.
 5. **Checkpointing:**
@@ -25,8 +25,8 @@
 - **Error Notification:** If a task fails or a build warning is detected, explicitly notify the user and suggest a "Self-Learning" update before proceeding.
 
 ## Environment & Tooling
-- **OS Compatibility:** This project is developed on **Windows**. All shell commands MUST be compatible with **PowerShell**.
-- **PowerShell Best Practices:**
+- **OS Compatibility:** All build / lint / device actions go through the cross-platform **`oniro-app`** CLI (identical on Linux / macOS / Windows), so prefer it over raw shell. For raw shell commands, use syntax appropriate to the host OS.
+- **PowerShell Best Practices (Windows):**
     - Use `;` instead of `&&` for command chaining.
     - Avoid CMD-specific flags like `/b`. Use `(Get-ChildItem -Name)` for bare listing.
     - Safely check for file existence using `Test-Path <file>` or `Get-ChildItem <file> -ErrorAction SilentlyContinue`.

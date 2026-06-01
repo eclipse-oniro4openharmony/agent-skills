@@ -1,6 +1,6 @@
 ---
 name: ohos-app-dev
-description: Develop, build, deploy, and validate OpenHarmony / HarmonyOS applications on a connected device. Use for the inner dev loop (lint → build → deploy → run → inspect logs → UI validation) on an existing project. For project scaffolding use `harmonyos-dev`; for system/persistent bundles use `ohos-system-dev`.
+description: Develop, build, deploy, and validate OpenHarmony / HarmonyOS applications on a connected device. Use for the inner dev loop (lint → build → deploy → run → inspect logs → UI validation) on an existing project. For project scaffolding use `ohos-app-scaffold`; for system/persistent bundles use `ohos-system-dev`.
 ---
 
 # OpenHarmony App Dev
@@ -20,7 +20,7 @@ not cover.
 
 Trigger on: "build the app", "deploy / run it on device", "lint these files", "grab the
 logs", "take a screenshot", "tap this button", "why is it crashing on launch". For
-*creating* a project → `harmonyos-dev`. For **system / persistent bundles** (systemui,
+*creating* a project → `ohos-app-scaffold`. For **system / persistent bundles** (systemui,
 launcher, OS-source-tree builds, reboot-to-reload) → `ohos-system-dev`.
 
 ## Directives
@@ -105,25 +105,23 @@ Edit `oh-package.json5` → `oniro-app build` (re-runs `ohpm install` when neede
 
 ## SDK / API level reference
 
-Read `build-profile.json5` for `compatibleSdkVersion` / `targetSdkVersion`. If the version
+Run `oniro-app sdk list` for the version↔API-level mapping (and which SDKs are installed).
+Read `build-profile.json5` for `compatibleSdkVersion` / `targetSdkVersion`; if the version
 embeds the API level in parentheses (e.g. `6.0.0(20)`), that number **is** the API level.
-Otherwise:
-
-| Version | API Level |
-| :--- | :--- |
-| 4.0 | 10 |
-| 4.1 | 11 |
-| 5.0.0 | 12 |
-| 5.0.1 | 13 |
-| 5.0.2 | 14 |
-| 5.0.3 | 15 |
-| 5.1.0 | 18 |
-| 5.1.1 | 19 |
-| 6.0 | 20 |
-| 6.1 | 23 |
 
 ## Out of scope
 
-- Scaffolding / templating a fresh project → `harmonyos-dev`.
+- Scaffolding / templating a fresh project → `ohos-app-scaffold`.
 - System / persistent bundles, OHOS source-tree builds, sign-cert traps, reboot-to-reload
   → `ohos-system-dev`.
+
+## References
+
+App-engineering knowledge for ArkTS / ArkUI work — this skill is the canonical home; the
+other skills point here rather than restating it:
+- [`references/arkts-strict.md`](./references/arkts-strict.md) — ArkTS strict-mode rules the
+  compiler / `oniro-app lint` enforce.
+- [`references/architecture.md`](./references/architecture.md) — Clean-Architecture layering
+  for ArkTS apps (Domain / Data / Presentation).
+- [`references/troubleshooting.md`](./references/troubleshooting.md) — common `oniro-app`
+  build / SDK failures and fixes.

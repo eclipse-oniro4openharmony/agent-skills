@@ -18,9 +18,9 @@ description: Automated Task Cycle from TASKS.md (V4 Supercharged)
    - Ensure all new code adheres to the "Premium Design" guidelines (if UI) or "Robustness" (if logic).
 
 4. **Self-Review & Verification**:
-   - **Lint/Check**: Scan the changed files for obvious syntax or styling errors.
+   - **Lint/Check**: Run `oniro-app lint` on the changed files.
    - **Test**: Run logic tests or visual checks.
-   - **Snapshot**: For UI tasks, save a screenshot to `artifacts/snapshots/[task_id].png`.
+   - **Snapshot**: For UI tasks, capture with `oniro-app screenshot -o artifacts/snapshots/[task_id].jpeg`.
    - **Critique**: Self-evaluate the work: "Did I break anything? Is there a more efficient way?"
 
 5. **Synchronization**:
