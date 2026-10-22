@@ -1,0 +1,6 @@
+{
+  "app": {
+    "products": [{ "name": "default" }]
+  },
+  "modules": [{ "name": "entry", "srcPath": "./entry" }]
+}

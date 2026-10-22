@@ -1,0 +1,23 @@
+{
+  "skill_name": "splash-launch-animation",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "In this HarmonyOS ArkUI app, add a short branded startup animation using the existing app icon and colors. Make the animated splash the first page shown when the app launches, then continue to the app's normal home flow.",
+      "expected_output": "A splash page copied from the bundled SplashPage.template.ets, retaining its exact layout and motion while substituting target-app resources/background and the correct destination handoff. Project discovery stays within the named project root; verification is source-only unless build/lint/runtime checks were explicitly requested.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "There is already a SplashPage.ets in my HarmonyOS app, but cold launch still opens the main page directly. Trace the entry and route registration, fix the startup chain so the splash runs first, and verify the animation then navigates to the existing destination.",
+      "expected_output": "A minimal entry/page-registration fix that retains the fixed top-brand/open-space/footer layout and opposing horizontal insertion transitions, then reaches the existing destination without duplicate navigation. No SDK-wide scan or automatic build/lint is performed.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Give this app a polished animated splash screen, but returning users should still go straight to the app and new users must keep seeing the existing onboarding/login flow. Please wire it into startup without changing the rest of navigation.",
+      "expected_output": "The reference SplashPage template is integrated with the existing first-launch/session decision, preserving login/onboarding behavior and avoiding an unnecessary navigation architecture migration.",
+      "files": []
+    }
+  ]
+}

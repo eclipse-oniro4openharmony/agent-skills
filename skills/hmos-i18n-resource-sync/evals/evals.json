@@ -1,0 +1,37 @@
+{
+  "skill_name": "hmos-i18n-resource-sync",
+  "evals": [
+    {
+      "id": 1,
+      "name": "extract-and-translate-with-preservation",
+      "prompt": "In this HarmonyOS module, internationalize visible hardcoded strings in the .ets pages and components. The configured locales are zh_CN and en_US; base currently contains English fallback values. Add translations for missing keys, preserve all existing translations, replace UI literals with $r references, and validate placeholder parity. Do not touch non-UI strings or assets.",
+      "expected_output": "Only static UI copy is moved into resource files; source literals reference semantic app.string keys; missing locale values are translated; pre-existing values remain unchanged; placeholders are preserved; JSON and references validate.",
+      "files": [],
+      "expectations": ["All identified static visible UI strings have matching resource keys and source references.", "Existing translations are unchanged and missing configured-locale translations are added.", "Formatting placeholders are preserved consistently across locales.", "All edited string.json files parse and all changed resource references resolve."]
+    },
+    {
+      "id": 2,
+      "name": "exclude-non-ui-text-and-qualifier-folders",
+      "prompt": "Audit this .ets project for hardcoded UI copy and internationalize it. The project has base, zh_CN, en_US, and dark resource folders. Keep console logs, comments, URLs, API paths/field names, identifiers, user-provided values, and dynamic text unchanged. Do not treat dark as a language and do not alter or add icon assets.",
+      "expected_output": "Only confirmed static user-visible copy is extracted. Excluded strings and assets remain untouched. dark is treated as a visual qualifier, not a locale, and locale synchronization applies only to configured language directories.",
+      "files": [],
+      "expectations": ["Logs, comments, URLs, API paths/field names, identifiers, dynamic values, and user input are not moved to string resources.", "The dark qualifier directory is not treated as a language locale.", "No image or icon assets are created, copied, or modified."]
+    },
+    {
+      "id": 3,
+      "name": "ask-before-assuming-base-or-target-language",
+      "prompt": "Please internationalize the hardcoded UI text in my HarmonyOS app. It has only resources/base/element/string.json, and the project does not document which language base represents. I did not specify any target locales. Prepare zh_CN and en_US resource files if needed.",
+      "expected_output": "The agent asks which target locales are required and what language/policy base follows, explains that base is not assumed to be Chinese or English, and makes no source/resource edits until clarified.",
+      "files": [],
+      "expectations": ["The agent asks for target locales and the base/source-language policy before editing.", "No files are created or modified before the locale ambiguity is resolved.", "The agent does not assume that base is zh_CN or en_US."]
+    },
+    {
+      "id": 4,
+      "name": "create-missing-module-resource-tree",
+      "prompt": "This is a new HarmonyOS ArkTS module at entry/. It has entry/src/main/module.json5 and entry/src/main/ets/pages/WelcomePage.ets, but no resources directory yet. The visible strings in the page are English. Make English the base fallback and support zh_CN and en_US. Extract the visible UI copy, create the required resource directory/file structure, add translations, replace the literals with $r references, and validate the result. Do not create unrelated media/profile/rawfile directories.",
+      "expected_output": "The agent identifies entry as the target module, creates entry/src/main/resources/base/element/string.json and locale element/string.json files for zh_CN and en_US, adds corresponding translations, updates only UI literals to resource references, and validates JSON, keys, and references.",
+      "files": ["evals/files/empty-resource-module/build-profile.json5", "evals/files/empty-resource-module/entry/src/main/module.json5", "evals/files/empty-resource-module/entry/src/main/ets/pages/WelcomePage.ets"],
+      "expectations": ["The missing resources tree is created under entry/src/main/resources, not AppScope or another module.", "base/element/string.json, zh_CN/element/string.json, and en_US/element/string.json exist and parse.", "Only required resources/element paths are created; unrelated resource groups are not fabricated.", "Every extracted static UI string has matching locale keys and a resolving $r reference."]
+    }
+  ]
+}

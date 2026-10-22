@@ -16,6 +16,15 @@ System / persistent-bundle development (e.g. systemui, launcher) and components 
 ### 4. [Conductor Dev](./skills/conductor-dev)
 Initialize the Conductor directory for project orchestration. Use when starting a new project or adding Conductor-based workflow management to an existing repository.
 
+### 5. [HMOS Log Collector](./skills/hmos-log-collector)
+Collect HarmonyOS/OpenHarmony device logs, fault evidence, and device snapshots into a timestamped, redacted incident bundle for handoff to a diagnostic workflow.
+
+### 6. [HarmonyOS I18n Resource Sync](./skills/hmos-i18n-resource-sync)
+Extract static ArkTS/ArkUI UI copy into string resources, synchronize explicitly configured locales, and validate resource keys, references, JSON, and placeholders.
+
+### 7. [Splash Launch Animation](./skills/splash-launch-animation)
+Integrate the bundled branded splash animation into an app's real startup path while preserving its existing route, onboarding, and authentication flow.
+
 ---
 
 ## 📦 Installation
@@ -24,13 +33,16 @@ You can install the entire collection or individual skills using the `npx skills
 
 ### Install the entire collection
 ```bash
-npx skills add eclipse-oniro4openharmony/agent-skills
+npx skills add imansmallapple/agent-skills
 ```
 
 ### Install a specific skill
 ```bash
-npx skills add eclipse-oniro4openharmony/agent-skills@ohos-app-scaffold
-npx skills add eclipse-oniro4openharmony/agent-skills@conductor-dev
+npx skills add imansmallapple/agent-skills@ohos-app-scaffold
+npx skills add imansmallapple/agent-skills@conductor-dev
+npx skills add imansmallapple/agent-skills@hmos-log-collector
+npx skills add imansmallapple/agent-skills@hmos-i18n-resource-sync
+npx skills add imansmallapple/agent-skills@splash-launch-animation
 ```
 
 ## 🛠 Usage
