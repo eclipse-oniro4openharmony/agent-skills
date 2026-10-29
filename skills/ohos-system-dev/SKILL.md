@@ -72,6 +72,11 @@ oniro-app wait --boot --pid-of <process>       # block until the device is back 
 - **Dev images** often bypass HAP signature checks; production devices do not.
 - System bundles need **`system_app`**-tier signing (vs `hos_normal_app`); a mismatch shows
   up as the `9568332` sign-info-inconsistent error on `-r` (see `app apply` above).
+- A privileged extension ability (e.g. `AccessibilityExtensionAbility`) also needs
+  `oniro-app sign --apl system_core --acls … --app-privilege-capabilities
+  AllowAppUsePrivilegeExtension`; without it install fails with `9568344`. System-API code
+  needs the full SDK to compile. Both are covered in `ohos-app-dev`'s
+  `references/troubleshooting.md`.
 
 ## Verify the new code actually loaded
 
