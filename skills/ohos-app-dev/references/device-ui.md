@@ -51,6 +51,23 @@ Text "Home" c=0.120,0.950 covered
 match it fails and lists them as `[i] …`: pick one with `--target-index i`, or narrow with
 `--target-type Button` / `--target-id <id>`.
 
+**Selectors.** When a label is ambiguous or changes, `--selector` takes an exact
+expression instead of `--target*` (the two do not combine), on `input`, `wait`,
+`screenshot` and `dump layout`:
+
+- Attributes: `--selector 'type=Button,text*=Sign'`. Keys `text`, `desc`, `hint`, `id`,
+  `key`, `type`, and `enabled`/`focused`/`checked`/`selected`/`visible`/`clickable`/
+  `scrollable` (`true`/`false`). Operators `=`, `*=` contains, `^=` prefix, `$=` suffix, `/=`
+  regex. `[n]` picks the n-th match (0-based) of the list `dump layout --selector '<expr>'
+  --flat` prints. Quote a value holding `,` or `[`: `id/="^item[0-9]$"`.
+- XPath: `--selector 'xpath=//Column[@id="items"]/Text[last()]'` (`//`, `/`, `*`,
+  `[@attr="v"]`, `contains()`, `and`/`or`, `[n]` 1-based per parent, `(path)[n]`).
+- `wait --selector '<expr>' --gone` waits for it to disappear.
+
+**Windows.** `oniro-app dump windows` lists window ids; `--window <id>` restricts `dump
+layout`, `input`, `wait` and `screenshot` to that window (an app's own window, not a
+system overlay that happens to be on top).
+
 **Text fields.** `input --type inputText --target "<placeholder or current text>" --text
 '...'` types into the field. It appends; add `--clear` to replace the contents, or use
 `--type clearText` to empty it. The soft keyboard stays up after typing and covers the
