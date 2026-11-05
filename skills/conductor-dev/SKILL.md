@@ -1,9 +1,16 @@
 ---
 name: conductor-dev
-description: Professional project orchestration and workflow management. Initialize the Conductor directory to manage tracks, specifications, and implementation plans.
+description: Single-agent, human-in-the-loop project workflow built on the Gemini Conductor template. Initialize the Conductor directory to manage tracks, specifications, and implementation plans with a person approving each step. Not for multi-agent or unattended runs.
 ---
 
 # Conductor Dev
+
+> **Scope.** This is the Gemini Conductor template's workflow for **one agent working with
+> a person**, who reviews tracks and plans as they go. It is not an orchestrator: do not load
+> it into an unattended or multi-agent factory (leave it out of that factory's
+> `settingSources`), where its prompts to wait for approval stall the run. For multi-agent
+> app generation, follow the factory's own orchestration plan (`ORCHESTRATION_PLAN.md` in
+> the ohos-app-factory repository); a worker there uses `ohos-app-dev` directly.
 
 ## Overview
 
