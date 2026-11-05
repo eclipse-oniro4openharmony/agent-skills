@@ -40,7 +40,7 @@ newest signed HAP" gets wrong:
 
 ```
 oniro-app app apply --module <module>          # resolves the module's HAP, installs, verifies
-oniro-app reboot --wait-for-bundle <bundle>    # when you need an explicit reload
+oniro-app reboot --wait-bundle <bundle>    # when you need an explicit reload
 oniro-app wait --boot --pid-of <process>       # block until the device is back AND the proc has a pid
 ```
 
