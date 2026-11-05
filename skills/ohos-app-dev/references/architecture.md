@@ -26,9 +26,13 @@ This project follows a strict "Clean Architecture" pattern to ensure maintainabi
 - **Dependencies:** Domain Layer.
 - **Components:**
   - **ViewModels:** Manages UI state and executes Use Cases.
-  - **ArkUI Components:** Declarative UI using `@Component`, `@State`, `@Link`.
+  - **ArkUI Components:** Declarative UI. New components use V2 state: `@ComponentV2` with
+    `@Local` (own state), `@Param` / `@Event` (in from and out to the parent), and view
+    models as `@ObservedV2` classes with `@Trace` fields. Existing V1 components (`@Component`
+    with `@State`, `@Prop`, `@Link`) stay V1; do not mix the two in one struct. See
+    [`arkui-v2-state.md`](./arkui-v2-state.md).
 
 ## Rules
 1. **Dependency Rule:** Source code dependencies can only point inwards. (UI -> Domain <- Data).
 2. **Separation:** The UI should never call the Data layer directly. It must go through the Domain (Use Cases).
-3. **State:** Use ArkTS decorators (`@State`, `@Prop`) strictly for UI state. Business logic state belongs in the ViewModel or Domain.
+3. **State:** Use the state decorators (`@Local` and `@Param` in V2 components, `@State` and `@Prop` in V1) strictly for UI state. Business logic state belongs in the ViewModel (an `@ObservedV2` class, so the UI observes its `@Trace` fields) or in the Domain.
