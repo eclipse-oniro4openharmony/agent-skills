@@ -1,8 +1,32 @@
 # Seeing and driving the UI on the device
 
-The `oniro-app` commands that look at the screen and act on it, in the detail `SKILL.md`
-leaves out. All of them auto-resolve the device (`ONIRO_DEVICE_SERIAL` or `--device` when
-several are connected).
+The targets, and the `oniro-app` commands that look at the screen and act on it, in the
+detail `SKILL.md` leaves out. All of them auto-resolve the device (`ONIRO_DEVICE_SERIAL` or
+`--device` when several are connected).
+
+## Targets
+
+Pick the target per app: its platform (`runtimeOS` in `build-profile.json5`; a version
+like `"6.0.0(20)"` also means HarmonyOS) and an API level ≥ `compatibleSdkVersion`.
+
+| Target | Typical serial | Signing | Notes |
+|---|---|---|---|
+| OpenHarmony / Oniro device | USB serial | `oniro-app sign` (local) | `--apl`/`--acls` for system permissions (see troubleshooting). |
+| Oniro emulator | `127.0.0.1:55555` | `oniro-app sign` (local) | `emulator start --wait-ready 180`; pool instance n at `127.0.0.1:<55555+n>`. |
+| HarmonyOS emulator (DevEco) | `127.0.0.1:5555` | **none**: installs unsigned HAPs | x86_64 only: a HAP whose native `.so` files are arm64-only cannot run there. |
+| HarmonyOS device | USB serial | `oniro-app sign --harmonyos` (AGC account) | Registers the device with AppGallery Connect. |
+
+`oniro-app devices --long` names each one:
+
+```
+127.0.0.1:5555  TCP  Connected  os="HarmonyOS 6.1.0"  api=24  abi=x86_64  type=phone  model=emulator  fullname=OpenHarmony-6.1.1.125
+GS6CTU300263    USB  Connected  os=OpenHarmony       api=26  abi=arm64-v8a  type=default  model=ohos  fullname=OpenHarmony-7.0.0.39
+```
+
+`abi=` is what native libraries must match (`unzip -l app.hap | grep libs/`). `app apply`
+installs the newest signed HAP, else the unsigned one (the HarmonyOS emulator). Before
+installing another app that may share a template bundle name (`com.example.*`), `oniro-app
+app uninstall <bundle>`.
 
 ## Layout
 
@@ -124,15 +148,42 @@ every emulator, pool included.
 - `oniro-app watch --log '<regex>' --for 5000` collects matching lines for a window.
 - `oniro-app wait --log '<regex>' --timeout 30000 [--bundle <b>]` returns the moment a line
   matches ("did action X fire?").
-- Fallback: `hdc shell hilog -x | grep -E ...`.
+- The whole session: start `oniro-app logs --clear -o hilog_full.txt` in the background
+  *before* launching and stop it at the end (`--grep <regex>` keeps only matching lines).
+  The device buffer holds 256 KB per type, and chatty components (ArkWeb) wrap it within
+  seconds, so a dump taken at the end loses the launch.
+- Fallback: `oniro-app hdc shell hilog -x | grep -E ...`.
 
 ## Raw device operations with no dedicated command
 
-- List targets: `hdc list targets -v`.
-- Force-stop: `oniro-app app stop <bundle>` (or `hdc shell aa force-stop <bundle>`).
+hdc is not on PATH: `oniro-app hdc <args>` runs the binary the CLI uses and adds `-t
+$ONIRO_DEVICE_SERIAL` (or `--device`); `oniro-app hdc --path` prints where it is. hdc exits
+0 even when it prints `[Fail]…`, so read the output.
+
+- List targets: `oniro-app devices --long` (raw: `oniro-app hdc list targets -v`).
+- Force-stop: `oniro-app app stop <bundle>`.
 - Push and pull: `oniro-app file send <local> <remote>` / `oniro-app file recv <remote> <local>`.
-- Set a system parameter: `hdc shell param set <key> <value>`.
+- Set a system parameter: `oniro-app hdc shell param set <key> <value>`.
 - Reboot: `oniro-app reboot` (see `ohos-system-dev` for reboot-to-reload).
 - A photo in the gallery, for photo-picker flows: `oniro-app file send img.jpg
-  /data/local/tmp/x.jpg`, then `hdc shell mediatool send /data/local/tmp/x.jpg`. In the
-  system picker, tapping a thumbnail opens a preview: tap its selection circle, then Done.
+  /data/local/tmp/x.jpg`, then `oniro-app hdc shell mediatool send /data/local/tmp/x.jpg`.
+  In the system picker, tapping a thumbnail opens a preview: tap its selection circle, then
+  Done.
+
+### Give the app a file (a model, a fixture, a database)
+
+`oniro-app file send model.gguf files/models/model.gguf --bundle <bundle>` writes into the
+app's sandbox and hands the file to the app's user. Relative paths resolve under
+`/data/app/el2/100/base/<bundle>/`, which the app sees as `/data/storage/el2/base/`:
+`files/…` is its application-level `filesDir`, `haps/entry/files/…` the entry module's.
+Without `--bundle` the file stays root-owned and the app cannot read it.
+
+### Windows
+
+- **Git Bash rewrites device paths:** `/data/local/tmp/x` reaches the CLI as `C:/Program
+  Files/Git/data/local/tmp/x`. Prefix such commands with `MSYS_NO_PATHCONV=1` (`file send`
+  / `file recv` refuse a rewritten path and say so; `oniro-app hdc shell …` arguments are
+  not checked), or run them from PowerShell.
+- Local paths may use either slash; `file send` / `file recv` resolve them, 8.3 short names
+  (`C:\Users\FRANCE~1\…`) included. Raw `hdc file send/recv` joins a forward-slash absolute
+  path (`C:/Users/…`) onto the current directory and fails.

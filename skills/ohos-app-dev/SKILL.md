@@ -11,7 +11,8 @@ Inner-loop skill for working on an **existing** OpenHarmony / HarmonyOS app. Eve
 toolchain and device action goes through the **`oniro-app` CLI**, an agent-designed wrapper
 over `hvigorw`, `ohpm`, the SDK's ArkTS checker, `hdc`, `aa test` and `uitest`: explicit
 flags, results on **stdout**, progress on **stderr**, non-zero exit on failure. Drop to raw
-`hdc` / `aa` / `bm` only for device operations `oniro-app` does not cover.
+`hdc` / `aa` / `bm` only for device operations `oniro-app` does not cover, as `oniro-app hdc
+…` (hdc is not on PATH).
 
 > **Prereqs:** `oniro-app` on PATH (`npm i -g @oniroproject/oniro-app`, validated against
 > the version in this skill's `metadata`), an SDK and the command-line tools. `oniro-app
@@ -43,7 +44,8 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
 
 1. **CLI-first.** Use `oniro-app <cmd>` for build, deploy, device, logs, input and capture.
    It resolves the device serial, the bundle and main ability (`app.json5`,
-   `module.json5`) and the built HAPs. When no command fits, use raw `hdc`/`aa`/`bm`.
+   `module.json5`) and the built HAPs. When no command fits, use `oniro-app hdc shell
+   aa|bm …`.
 2. **Check once per edit round, then build.** When a round of edits is done (not after
    every single edit), run `oniro-app check arkts --files <changed .ets files>`: the SDK's
    own ArkTS type check and linter plus the ArkUI rules the build enforces, in seconds and
@@ -53,8 +55,8 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
    flavour (`oniro-app doctor` says); treat its `"incomplete": true` or exit 2 the same way.
    The build's ArkTS compiler stays the final word, and it is the only gate when `oniro-app
    check --help` lists no `arkts` (oniro-app before 0.18).
-3. **Device serial.** `oniro-app devices`. If more than one target, set
-   `ONIRO_DEVICE_SERIAL` (or pass `--device <serial>`). Never silently pick one.
+3. **Device serial.** `oniro-app devices --long` (OS, API level, ABI). If more than one
+   target, set `ONIRO_DEVICE_SERIAL` (or pass `--device <serial>`). Never silently pick one.
 4. **Act on elements, not coordinates.** See what is on screen with `oniro-app dump layout
    --flat`, then act by label: `oniro-app input --type click --target "Sign in"`. When
    several elements match, it fails and lists them as `[i] …`: pick with `--target-index
@@ -106,7 +108,8 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
    (exit 1 if not); `oniro-app api search "<words>"` finds the right one. On a fresh clone with empty
    `signingConfigs`, run `oniro-app sign --bootstrap` first (needs `java`); its keys in
    `signatures/` are local dev material, never commit them.
-4. **Device:** `oniro-app devices`; stop and tell the user if empty.
+4. **Device:** `oniro-app devices`; stop and tell the user if empty. Signing differs per
+   target ([`device-ui.md`](./references/device-ui.md#targets)).
 5. **Deploy:** `oniro-app app apply`, a verified install: it handles sign-info mismatch
    (uninstall and install for a normal app), asset-cache invalidation and persistent-bundle
    restart, and prints `method` and the pids before and after. `oniro-app app install` is a
@@ -116,7 +119,9 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
    or the screen is blank, with the crash and a screenshot in `--json`.
 7. **Observe:**
    - Logs: `oniro-app wait --log '<regex>' --timeout 30000` returns when a line matches;
-     `oniro-app watch --log '<regex>' --for 5000` collects for a window.
+     `oniro-app watch --log '<regex>' --for 5000` collects for a window. For a whole
+     session run `oniro-app logs --clear -o hilog.txt` in the background: the buffer wraps
+     in seconds.
    - Screen: `oniro-app screenshot --max-dim 1024 -o /tmp/s.jpg`, then read it. For detail,
      crop with `--target "<text>"` or `--crop x1,y1,x2,y2`; for animations,
      `--contact-sheet`.
