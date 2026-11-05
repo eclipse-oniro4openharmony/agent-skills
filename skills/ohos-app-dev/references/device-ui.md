@@ -99,6 +99,17 @@ each naming its element by selector and, optionally, what must be on screen afte
 - Prefer `id=` selectors in flows (give the components an `.id('...')`): they survive copy
   changes, `text=` does not.
 
+## Performance: startup and jank
+
+`oniro-app perf trace --launch --json` cold-starts the app under hitrace and reports
+`startup.coldMs` (start request to first frame) and the frames that followed;
+`perf trace --flow flow.json --json` measures the frames of a replayed flow: `frames.total`,
+`janky` (frames longer than one refresh interval), `jankRate`, `p50Ms`/`p95Ms`/`maxMs`
+and the `longest` ones. `--max-startup-ms <ms>` and `--max-jank-rate <r>` turn it into a
+gate (exit 1 over the limit). `--hiperf` adds the hottest functions of the app's process.
+A janky frame's usual cause is synchronous work on the UI thread (in `build()`, an item
+builder, or an `onClick`): move it to `TaskPool` or precompute it.
+
 ## Emulators: one per parallel job
 
 `oniro-app emulator start --instance <n> --wait-ready 180` boots pool instance n (1..99)
