@@ -153,6 +153,8 @@ oniro-app input --type inputText --target "Password" --text 'secret' --hide-keyb
 oniro-app input --type click --target "Sign in" --target-type Button
 oniro-app wait --target "Home" --timeout 15000                # the next screen is up
 ```
+To check the same path again after each change, put it in a flow file and `oniro-app
+replay flow.json --launch` (see [`references/device-ui.md`](./references/device-ui.md#flows-replay-a-whole-ui-path)).
 
 ### UI validation against a design
 `oniro-app screenshot --max-dim 1024 -o /tmp/s.jpg` → read and compare; close-ups with

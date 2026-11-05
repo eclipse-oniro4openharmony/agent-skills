@@ -75,6 +75,39 @@ bottom of the screen: add `--hide-keyboard`, or run `input --type hideKeyboard`,
 presses Back only when the keyboard is shown. A bare `keyEvent --key Back` with no keyboard
 up navigates away from the page.
 
+## Flows: replay a whole UI path
+
+A flow file is a JSON list of steps (`click`, `inputText`, `swipe`, `keyEvent`, `wait`),
+each naming its element by selector and, optionally, what must be on screen afterwards
+(`expect`). Write one from the spec, or record one by driving the app by hand:
+
+```json
+{ "version": 1, "bundle": "com.example.app",
+  "steps": [
+    { "action": "inputText", "selector": "type=TextInput,id=email", "text": "me@example.com" },
+    { "action": "click", "selector": "type=Button,id=signIn", "expect": "type=Text,id=home" }
+  ] }
+```
+
+- `oniro-app replay flow.json --launch` runs it from a fresh start. Exit 0 when every step
+  ran, 1 when it diverged: the report names the step, the reason (`not-found`,
+  `expect-not-found`, `wrong-screen`, `ambiguous`, `covered`), a screenshot, what is on
+  screen, and near matches (a button whose text changed). Exit 2: it could not run.
+- `oniro-app record --out flow.json --for 30000` turns what you do on the device into a
+  flow. While it records, `dump layout` and `input --selector` hang (uitest's recorder
+  holds the layout service): drive the app by coordinates or by hand.
+- Prefer `id=` selectors in flows (give the components an `.id('...')`): they survive copy
+  changes, `text=` does not.
+
+## Emulators: one per parallel job
+
+`oniro-app emulator start --instance <n> --wait-ready 180` boots pool instance n (1..99)
+on its own copy-on-write disks, at hdc address `127.0.0.1:<55555+n>`, in about 15–25 s;
+address it with `--device 127.0.0.1:<port>`. `emulator status --json` gives each instance's
+health (`booting`, `ready`, `hdc-lost`, `stuck`, `stopped`); `emulator stop --instance n`
+stops only that one, and `--fresh` on start discards its disks. A bare `emulator stop` stops
+every emulator, pool included.
+
 ## Logs
 
 - `oniro-app watch --log '<regex>' --for 5000` collects matching lines for a window.
