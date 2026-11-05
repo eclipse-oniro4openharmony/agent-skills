@@ -8,7 +8,7 @@ A collection of professional AI agent skills designed to enhance development wor
 Scaffold a new OpenHarmony / HarmonyOS app (Standard ArkTS or Native C++) and verify it builds — cross-platform, via the `oniro-app` CLI (`oniro-app create [--template NativeCpp]`).
 
 ### 2. [OHOS App Dev](./skills/ohos-app-dev)
-Inner-loop development for existing OpenHarmony / HarmonyOS apps — lint, build, deploy, run, logs, and UI validation through the cross-platform `oniro-app` CLI.
+Inner-loop development for existing OpenHarmony / HarmonyOS apps — ArkTS check, build, deploy, run, tests, logs, and UI validation through the cross-platform `oniro-app` CLI.
 
 ### 3. [OHOS System Dev](./skills/ohos-system-dev)
 System / persistent-bundle development (e.g. systemui, launcher) and components built inside the OHOS source tree — multi-module builds, install-and-reboot-to-reload, signing/cert traps, and verifying the new code actually loaded.

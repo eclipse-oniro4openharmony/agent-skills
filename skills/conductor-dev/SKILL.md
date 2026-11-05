@@ -1,6 +1,8 @@
 ---
 name: conductor-dev
 description: Single-agent, human-in-the-loop project workflow built on the Gemini Conductor template. Initialize the Conductor directory to manage tracks, specifications, and implementation plans with a person approving each step. Not for multi-agent or unattended runs.
+metadata:
+  oniro-app-version: "0.18.0"
 ---
 
 # Conductor Dev

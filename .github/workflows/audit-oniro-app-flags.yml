@@ -1,9 +1,10 @@
 name: Audit oniro-app flags
 
 # Every `oniro-app <command> --flag` the skills mention must exist in the
-# oniro-app version pinned in .oniro-app-version. Bump that file in the same
-# pull request that teaches the skills a newer command or flag, once that
-# oniro-app release is on npm.
+# oniro-app version pinned in .oniro-app-version. Bump that file, and the
+# `metadata.oniro-app-version` of each SKILL.md, in the same pull request that
+# teaches the skills a newer command or flag, once that oniro-app release is on
+# npm.
 
 on:
   push:
@@ -22,3 +23,5 @@ jobs:
         run: npm install -g "@oniroproject/oniro-app@$(cat .oniro-app-version)"
       - name: Check every flag the skills use
         run: node scripts/audit-oniro-app-flags.mjs --cli oniro-app skills
+      - name: Check each skill's pinned version and size
+        run: node scripts/check-skills.mjs skills
