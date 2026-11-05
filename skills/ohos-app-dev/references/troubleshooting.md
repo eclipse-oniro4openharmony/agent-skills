@@ -26,6 +26,7 @@ the strict-mode rules in [`arkts-strict.md`](./arkts-strict.md).
 
 | Error text (or part of it) | Where | Meaning | Fix |
 | --- | --- | --- | --- |
+| An install fails on signature or certificate errors, or you are not sure what signed a HAP | `app install`, `app apply` | The HAP may be unsigned, expired, signed for another bundle, or signed with OpenHarmony material for a HarmonyOS device | `oniro-app app verify <hap>`: signer (OpenHarmony development material or HarmonyOS AGC), chain, profile type, bundle, expiry; exit 1 says what is wrong |
 | `9568332` / `sign info inconsistent` | `hdc install`, `app install` | The installed copy is signed with other keys | `oniro-app app apply`, which uninstalls and reinstalls a normal app (it refuses for a system bundle: see `ohos-system-dev`) |
 | `The specified module name is not found` | `test`, `aa test` | The test HAP is not installed, or its module is not `<module>_test` | `oniro-app test` (it installs both HAPs); with raw `aa test`, install the `ohosTest` HAP and pass `-m entry_test` |
 | `getCurrentTopAbility` fails, or UI tests find nothing | `test` | The screen is locked or off | `oniro-app test` wakes and swipes an unsecured lock screen; with a PIN, unlock the device yourself |
@@ -38,6 +39,9 @@ the strict-mode rules in [`arkts-strict.md`](./arkts-strict.md).
 | --- | --- |
 | `oniro-app build` fails before compiling, toolchain not found | `oniro-app doctor`; then `oniro-app sdk install <ver>` / `oniro-app cmdtools install` |
 | `doctor` says `partial install: missing …` for the tools | A failed install left half a toolchain: `oniro-app cmdtools install --force` |
+| `Property … does not exist` errors inside `oh_modules/`, with a hint that a dependency may need a newer API level | The dependency uses APIs newer than the SDK the build used (named at the end of the build output and in `build --json` `sdk`): raise `compileSdkVersion` and install that SDK, or pin an older dependency version |
+| `targets HarmonyOS, but its signingConfig … holds OpenHarmony material` (build warning) | The HAP will not install on a HarmonyOS device: `oniro-app sign --harmonyos` (needs `oniro-app auth login`; on a host without a browser, `auth login --no-browser` and paste the callback address, or `--port <n>` with an ssh tunnel) |
+| `cmdtools status` / `sdk list` and the HarmonyOS SDK | `cmdtools status` names the SDK the command-line tools carry (HarmonyOS or OpenHarmony, API level); `cmdtools install --force` says which release it replaces |
 | A dependency was added and the build cannot find it | Edit `oh-package.json5`, then `oniro-app build` (it runs `ohpm install` when `oh_modules/` is missing) |
 
 `build` falls back to the command-line tools' `hvigorw` when the project's own wrapper is

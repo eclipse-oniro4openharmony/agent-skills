@@ -59,7 +59,9 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
    --flat`, then act by label: `oniro-app input --type click --target "Sign in"`. When
    several elements match, it fails and lists them as `[i] …`: pick with `--target-index
    i`, or narrow with `--target-type Button` / `--target-id <id>`. With no label, pass the
-   element's 0–1 center (`--fx 0.5 --fy 0.62`). Pixels (`--x/--y`) are a last resort. The
+   element's 0–1 center (`--fx 0.5 --fy 0.62`). Pixels (`--x/--y`) are a last resort.
+   For an exact match use `--selector 'type=Button,text*=Sign'` or `--selector 'xpath=...'`
+   ([`references/device-ui.md`](./references/device-ui.md)). The
    dump shows the **visible area only**: scroll and dump again before deciding an element
    is missing.
 5. **Wait for the UI, don't sleep.** After an action that changes the screen, wait for the
