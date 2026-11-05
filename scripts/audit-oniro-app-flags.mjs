@@ -86,9 +86,21 @@ function* files(path) {
 function* codeSnippets(text) {
   let fenced = false;
   const lines = text.split('\n');
+  // Inline spans can wrap across lines but not across paragraphs, so they are
+  // matched per paragraph, each reported at the line where it starts.
+  let para = [];
+  function* flush() {
+    const joined = para.map(([, l]) => l).join('\n');
+    for (const m of joined.matchAll(/`([^`]+)`/g)) {
+      const startLine = para[0][0] + (joined.slice(0, m.index).match(/\n/g) ?? []).length;
+      yield [startLine, m[1].replace(/\s*\n\s*/g, ' ')];
+    }
+    para = [];
+  }
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (/^\s*```/.test(line)) {
+      if (para.length) yield* flush();
       fenced = !fenced;
       continue;
     }
@@ -96,15 +108,13 @@ function* codeSnippets(text) {
       yield [i + 1, line.replace(/#.*$/, '')];
       continue;
     }
-    // Inline spans may wrap onto the next line in a list item; join a span that opens without closing.
-    let joined = line;
-    let extra = 0;
-    while ((joined.match(/`/g) ?? []).length % 2 === 1 && i + extra + 1 < lines.length && extra < 3) {
-      extra++;
-      joined += ` ${lines[i + extra].trim()}`;
+    if (!line.trim()) {
+      if (para.length) yield* flush();
+      continue;
     }
-    for (const m of joined.matchAll(/`([^`]+)`/g)) yield [i + 1, m[1]];
+    para.push([i + 1, line]);
   }
+  if (para.length) yield* flush();
 }
 
 const problems = [];
