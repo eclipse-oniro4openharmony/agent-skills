@@ -99,7 +99,9 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
 3. **Build:** `oniro-app build` runs `ohpm install` when `oh_modules/` is missing, builds,
    and finds the HAPs (`--module`, `--product`, `--mode release`; `--no-deps` skips ohpm).
    `--json` prints one object either way; on failure `diagnostics` lists each error with
-   `file`, `line`, `column`, `code` and `rule`. On a fresh clone with empty
+   `file`, `line`, `column`, `code` and `rule`. Before using an SDK API you are not sure of,
+   `oniro-app api show <Class.member>` says whether this project's API level declares it
+   (exit 1 if not); `oniro-app api search "<words>"` finds the right one. On a fresh clone with empty
    `signingConfigs`, run `oniro-app sign --bootstrap` first (needs `java`); its keys in
    `signatures/` are local dev material, never commit them.
 4. **Device:** `oniro-app devices`; stop and tell the user if empty.
@@ -108,6 +110,8 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
    restart, and prints `method` and the pids before and after. `oniro-app app install` is a
    plain `hdc install`.
 6. **Launch:** `oniro-app app launch` (`--ability <name>` / `--module <m>` to pick one).
+   Add `--smoke` to judge the launch: exit 1 when the process died, a crash was recorded
+   or the screen is blank, with the crash and a screenshot in `--json`.
 7. **Observe:**
    - Logs: `oniro-app wait --log '<regex>' --timeout 30000` returns when a line matches;
      `oniro-app watch --log '<regex>' --for 5000` collects for a window.
@@ -115,7 +119,9 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
      crop with `--target "<text>"` or `--crop x1,y1,x2,y2`; for animations,
      `--contact-sheet`.
    - Layout: `oniro-app dump layout --flat`, one line per element with 0–1 centers;
-     `covered` means another layer is on top, so a tap there hits that layer.
+     `covered` means another layer is on top, so a tap there hits that layer. `--diff
+     <saved.json>` compares with an earlier dump; `screenshot --diff <saved.jpeg>` likewise.
+   - Pages and routes in the source: `oniro-app screens` (no device).
    - Drive: `oniro-app input --type click|swipe|inputText|keyEvent|hideKeyboard ...` and
      `oniro-app gesture`.
 
@@ -130,21 +136,12 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
 `oniro-app check arkts --files <files>` → `oniro-app build` → `oniro-app app apply` →
 `oniro-app app stop <bundle>` → `oniro-app app launch`.
 
-### Identify the connected targets
-`oniro-app devices --long`, for example:
-```
-127.0.0.1:5555  TCP  Connected  os="HarmonyOS 6.1.0"  api=24  abi=x86_64  type=phone  model=emulator  fullname=OpenHarmony-6.1.1.125
-GS6CTU300263    USB  Connected  os=OpenHarmony       api=26  abi=arm64-v8a  type=default  model=ohos  fullname=OpenHarmony-7.0.0.39
-```
-The same facts by hand: `oniro-app hdc shell param get <key>` for
-`const.product.os.dist.name` (`HarmonyOS`; unset on OpenHarmony, which prints `Get
-parameter … fail!`), `const.product.os.dist.version`, `const.ohos.apiversion`,
-`const.ohos.fullname`, `const.product.cpu.abilist`, `const.product.devicetype`.
-
-### Diagnose a runtime crash
-`oniro-app app launch` to reproduce → `oniro-app watch --log 'FATAL|SIGSEGV| E ' --for 8000`
-(or the session log). For native faults, list `/data/log/faultlog/faultlogger` via
-`oniro-app hdc shell ls …` and pull the entry with `oniro-app file recv <remote> <local>`.
+### Diagnose a crash or freeze
+`oniro-app app launch --smoke` reproduces and judges the launch → `oniro-app logs crash
+--wait 15000 --json` reads the newest faultlog: `kind` (`js_crash`, `cpp_crash`,
+`app_freeze`), `reason`, and `file`/`line` of the first project frame. Fix that line.
+Steps, freezes, and what to do without `logs crash`:
+[`references/crashes.md`](./references/crashes.md).
 
 ### Drive a flow (e.g. sign-in)
 ```
@@ -190,5 +187,6 @@ here:
 - [`references/testing.md`](./references/testing.md): Hypium suites, UI tests, `aa test`.
 - [`references/device-ui.md`](./references/device-ui.md): layout, screenshots, input, logs.
 - [`references/troubleshooting.md`](./references/troubleshooting.md): fixes by error text.
+- [`references/crashes.md`](./references/crashes.md): crashes, freezes and faultlogs.
 - [`references/architecture.md`](./references/architecture.md): Clean-Architecture layering
   (Domain / Data / Presentation).
