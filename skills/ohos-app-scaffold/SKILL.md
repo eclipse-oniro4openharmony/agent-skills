@@ -2,7 +2,7 @@
 name: ohos-app-scaffold
 description: Scaffold a new OpenHarmony / HarmonyOS app (Standard ArkTS, Native C++, or HarmonyOS) with the cross-platform `oniro-app` CLI and verify it builds and its tests pass. For the inner dev loop on an existing project use `ohos-app-dev`; for system/persistent bundles use `ohos-system-dev`.
 metadata:
-  oniro-app-version: "0.18.0"
+  oniro-app-version: "0.19.0"
 ---
 
 # OHOS App Scaffold
