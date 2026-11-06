@@ -2,7 +2,7 @@
 name: ohos-system-dev
 description: Develop, build, deploy, and verify OpenHarmony SYSTEM / persistent bundles (e.g. systemui, launcher) and components built inside the OHOS source tree. Use when the target is a platform component rather than a normal app — multi-module assembleHap, install-and-reboot-to-reload, signing/cert traps, and verifying the new code actually loaded. For normal apps use `ohos-app-dev`.
 metadata:
-  oniro-app-version: "0.18.0"
+  oniro-app-version: "0.19.0"
 ---
 
 # OpenHarmony System Dev

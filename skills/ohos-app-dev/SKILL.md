@@ -2,7 +2,7 @@
 name: ohos-app-dev
 description: Develop, build, deploy, test, and validate OpenHarmony / HarmonyOS applications on a connected device. Use for the inner dev loop (check → build → deploy → run → test → inspect logs → UI validation) on an existing project, e.g. "build the app", "run it on the device", "check these files", "run the tests", "why does it crash on launch", "tap this button", "take a screenshot". For project scaffolding use `ohos-app-scaffold`; for system/persistent bundles use `ohos-system-dev`.
 metadata:
-  oniro-app-version: "0.18.0"
+  oniro-app-version: "0.19.0"
 ---
 
 # OpenHarmony App Dev
@@ -21,8 +21,8 @@ flags, results on **stdout**, progress on **stderr**, non-zero exit on failure. 
 ## When to use
 
 Trigger on: "build the app", "deploy / run it on the device", "check / lint these files",
-"fix the build errors", "run the tests", "grab the logs", "why is it crashing", "take a
-screenshot", "tap this button", "does this screen match the design". For *creating* a
+"fix the build errors", "run the tests", "why is it crashing", "take a screenshot", "tap
+this button". For *creating* a
 project → `ohos-app-scaffold`. For **system / persistent bundles** (systemui, launcher,
 OS-source-tree builds, reboot-to-reload) → `ohos-system-dev`.
 
@@ -105,9 +105,10 @@ layout`, `screenshot`, `wait`, `watch`, `logs`, `sdk list`, `cmdtools status`, `
    `--json` prints one object either way; on failure `diagnostics` lists each error with
    `file`, `line`, `column`, `code` and `rule`. Before using an SDK API you are not sure of,
    `oniro-app api show <Class.member>` says whether this project's API level declares it
-   (exit 1 if not); `oniro-app api search "<words>"` finds the right one. On a fresh clone with empty
-   `signingConfigs`, run `oniro-app sign --bootstrap` first (needs `java`); its keys in
-   `signatures/` are local dev material, never commit them.
+   (exit 1 if not); `oniro-app api search "<words>"` finds the right one; how it is used,
+   or an error code: `oniro-app docs search "<words>"`, then `docs show <path> --heading
+   "<section>"` ([`docs.md`](./references/docs.md)). Empty `signingConfigs`: `oniro-app
+   sign --bootstrap` (needs `java`); never commit `signatures/`.
 4. **Device:** `oniro-app devices`; stop and tell the user if empty. Signing differs per
    target ([`device-ui.md`](./references/device-ui.md#targets)).
 5. **Deploy:** `oniro-app app apply`, a verified install: it handles sign-info mismatch
@@ -152,7 +153,7 @@ Steps, freezes, and what to do without `logs crash`:
 
 ### Drive a flow (e.g. sign-in)
 ```
-oniro-app dump layout --flat                                  # what is on screen
+oniro-app dump layout --flat
 oniro-app input --type inputText --target "you@example.com" --text 'me@example.com'
 oniro-app input --type inputText --target "Password" --text 'secret' --hide-keyboard
 oniro-app input --type click --target "Sign in" --target-type Button
@@ -183,8 +184,9 @@ called from `List.test.ets`, and the ohosTest `module.json5` must list the main 
 Look up the exact error text in
 [`references/troubleshooting.md`](./references/troubleshooting.md) (`00303060`, `9568332`
 sign info inconsistent, `The specified module name is not found`, `The type of command line
-tools does not match`, a missing SDK, an unsigned HAP). For API levels, `oniro-app sdk list`
-maps SDK versions to them; a `compileSdkVersion` like `6.0.0(20)` means API 20.
+tools does not match`, a missing SDK, an unsigned HAP); an error code it lacks,
+`oniro-app docs search <code>`. For API levels, `oniro-app sdk list` maps SDK versions to
+them; a `compileSdkVersion` like `6.0.0(20)` means API 20.
 
 ## References
 
@@ -196,6 +198,7 @@ here:
 - [`references/testing.md`](./references/testing.md): Hypium suites, UI tests, `aa test`.
 - [`references/device-ui.md`](./references/device-ui.md): layout, screenshots, input, logs.
 - [`references/troubleshooting.md`](./references/troubleshooting.md): fixes by error text.
+- [`references/docs.md`](./references/docs.md): searching the OpenHarmony docs.
 - [`references/crashes.md`](./references/crashes.md): crashes, freezes and faultlogs.
 - [`references/architecture.md`](./references/architecture.md): Clean-Architecture layering
   (Domain / Data / Presentation).
